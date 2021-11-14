@@ -20,6 +20,7 @@ async function run() {
         const productCollection = database.collection('products');
         const cartCollection = database.collection('cart');
         const reviewCollection = database.collection('userreview');
+        const userCollection = database.collection('user');
         //products collection
         app.post('/products', async (req, res) => {
             const product = req.body;
@@ -93,6 +94,43 @@ async function run() {
         app.get('/userreview', async (req, res) => {
             const result = await reviewCollection.find({}).toArray()
             res.send(result)
+        });
+        //  User collection
+        app.post('/user', async (req, res) => {
+            const data = req.body
+            const result = await userCollection.insertOne(data)
+            res.json(result)
+        });
+        app.put('/user', async (req, res) => {
+            const user = req.body
+            const quary = { email: user.email }
+            const options = { upsert: true }
+            const update = {
+                $set: user
+            }
+            const result = await userCollection.updateOne(quary, update, options)
+            res.json(result)
+        });
+        app.get('/user/:email', async (req, res) => {
+            const email = req.params.email;
+            const quary = { email }
+            const user = await userCollection.findOne(quary)
+            let isAdmin = false
+            if (user?.role === 'admin') {
+                isAdmin = true
+            }
+            res.json({ admin: isAdmin })
+        })
+        app.put('/user/admin', async (req, res) => {
+            const user = req.body
+            console.log(user);
+            const quary = { email: user.newAdminEmail }
+            const update = {
+                $set: { role: 'admin' }
+            }
+            const result = await userCollection.updateOne(quary, update)
+            console.log('d');
+            res.json(result)
         });
 
     }
