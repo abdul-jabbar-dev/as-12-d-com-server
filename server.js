@@ -3,11 +3,13 @@ const express = require('express')
 const app = express()
 const cors = require('cors');
 const port = process.env.PORT || 27017;
-
+const fileUpload = require('express-fileupload');
 require('dotenv').config();
+
+app.use(fileUpload())
 app.use(cors());
 app.use(express.json());
-
+const stripe = require('stripe')('sk_test_51JwXO7Ez5fvmGZeQ9x4n8kua6CU2qP4XTwXxndo3KYyxLXZIT4UiFaAsw35rRAUn4CaDK74hfb6JhClnOKauVcXk00BehGNN98')
 const uri = `mongodb+srv://${process.env.MDB_USER}:${process.env.MDB_PASS}@cluster0.1cven.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
 //ajdcom
@@ -24,6 +26,7 @@ async function run() {
         //products collection
         app.post('/products', async (req, res) => {
             const product = req.body;
+            console.log('product', product);
             const result = await productCollection.insertOne(product);
             res.json(result)
         });
@@ -41,6 +44,12 @@ async function run() {
             const { id } = req.params
             const quary = { _id: ObjectId(id) }
             const result = await productCollection.findOne(quary)
+            res.send(result)
+        });
+        app.get('/cart/:id', async (req, res) => {
+            const { id } = req.params
+            const quary = { _id: ObjectId(id) }
+            const result = await cartCollection.findOne(quary)
             res.send(result)
         });
         app.delete('/products/:id', async (req, res) => {
@@ -77,12 +86,20 @@ async function run() {
         app.put('/cart/:id', async (req, res) => {
             const id = req.params.id;
             const user = req.body;
-            user['orderState'] = 'procced'
             const filter = { _id: ObjectId(id) };
-            const updateDoc = { $set: { user: user.orderState } };
-            const result = await cartCollection.updateOne(filter, updateDoc);
-            if (result) {
-                res.json(result);
+            if (user.paymentIntent) {
+                const updateDoc = { $set: { orderState: 'paid' } };
+                const result = await cartCollection.updateOne(filter, updateDoc);
+                if (result) {
+                    res.json(result);
+                }
+            } else {
+                user['orderState'] = 'procced'
+                const updateDoc = { $set: { user: user.orderState } };
+                const result = await cartCollection.updateOne(filter, updateDoc);
+                if (result) {
+                    res.json(result);
+                }
             }
         })
         //Review collection
@@ -132,6 +149,22 @@ async function run() {
             console.log('d');
             res.json(result)
         });
+        app.post('/create-payment-intent', async (req, res) => {
+            const paymentInfo = req.body
+            console.log('ddd', paymentInfo.price);
+
+            const paymentIntent = await stripe.paymentIntents.create({
+                currency: 'usd',
+                amount: paymentInfo.price,
+                payment_method_types: [
+                    "card",
+                ],
+            })
+            res.json({ clientSecret: paymentIntent.client_secret })
+        })
+
+
+
 
     }
     finally {
