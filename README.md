@@ -1,19 +1,17 @@
-﻿# Welcome to [ D-COM.co](https://d-com-aj.web.app/)
+﻿﻿# Welcome to [ D-COM.co](https://d-com-aj.web.app/)
 
 
 [Live hosting](https://d-com-aj.web.app/)
 
+[Client side code link](https://github.com/abduljabbar15/as-12-d-com-client)
 
-[Client side code link](https://classroom.github.com/a/afIj_UMn)
+[server side code link](https://github.com/abduljabbar15/as-12-d-com-server)
 
-
-[server side code link](https://classroom.github.com/a/MPvSFLY3)
-
- - A graphic showroom  
- - Responsive
- - Fully secure 
+ - A graphic Market
+ - Responsive Navigation Menu and React Router 4.
+ - Fully responsive layout and well optimized.
  - Use Material-UI
- - public Admin====> admin@admin.com pass=> 123456
- 
+ - public Admin=> admin@admin.com pass=> 123456
+
 
 
